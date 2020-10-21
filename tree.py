@@ -138,8 +138,10 @@ def train(model, data_loader, optimizer, node_idx):
         y_pred, p_out = model(x)
 
         loss = F.nll_loss(y_pred, y)
-        train_epoch_loss += loss.data[0] * y.size(0)
-        train_loss += loss.data[0] * y.size(0)
+        # train_epoch_loss += loss.data[0] * y.size(0)
+        # train_loss += loss.data[0] * y.size(0)
+        train_epoch_loss += loss.data.item() * y.size(0)
+        train_loss += loss.data.item() * y.size(0)
         loss.backward()
         optimizer.step()
 
@@ -178,16 +180,21 @@ def valid(model, data_loader, node_idx, struct):
     for data, target in data_loader:
         if args.cuda:
             data, target = data.cuda(), target.cuda()
-        data, target = Variable(data, volatile=True), Variable(target)
+        # apparently this line is not necessary in pytorch >=0.4
+        # data, target = Variable(data, volatile=True), Variable(target)
         output = model(data)
 
         # sum up batch loss
+        # valid_epoch_loss += F.nll_loss(
+        #     output, target, size_average=False,
+        # ).data[0]
         valid_epoch_loss += F.nll_loss(
-            output, target, size_average=False,
-        ).data[0]
+            output, target, reduction='sum',
+        ).data.item()
 
         pred = output.data.max(1, keepdim=True)[1]
-        correct += pred.eq(target.data.view_as(pred)).cpu().sum()
+        # correct += pred.eq(target.data.view_as(pred)).cpu().sum()
+        correct += pred.eq(target.data.view_as(pred)).cpu().sum().item()
 
     valid_epoch_loss /= NUM_VALID
     valid_epoch_accuracy = 100. * correct / NUM_VALID
@@ -253,11 +260,14 @@ def test(model, data_loader):
     for data, target in data_loader:
         if args.cuda:
             data, target = data.cuda(), target.cuda()
-        data, target = Variable(data, volatile=True), Variable(target)
+        # apparently not necessary in pytorch >=0.4
+        # data, target = Variable(data, volatile=True), Variable(target)
         output = model(data)
-        test_loss += F.nll_loss(output, target, size_average=False).data[0]
+        # test_loss += F.nll_loss(output, target, size_average=False).data[0]
+        test_loss += F.nll_loss(output, target, reduction='sum').data.item()
         pred = output.data.max(1, keepdim=True)[1]
-        correct += pred.eq(target.data.view_as(pred)).cpu().sum()
+        # correct += pred.eq(target.data.view_as(pred)).cpu().sum()
+        correct += pred.eq(target.data.view_as(pred)).cpu().sum().item()
 
     test_loss /= len(data_loader.dataset)
     test_accuracy = 100. * correct / len(data_loader.dataset)
@@ -334,6 +344,8 @@ def checkpoint_msc(struct, data_dict):
 
     # save the dictionary as jason file:
     dict_path = save_dir + "/records.json"
+    if isinstance(data_dict["valid_best_accuracy"], torch.Tensor):
+        data_dict["valid_best_accuracy"] = data_dict["valid_best_accuracy"].item()
     with open(dict_path, 'w') as f_d:
         json.dump(data_dict, f_d)
     print("Other data saved to {}".format(dict_path))

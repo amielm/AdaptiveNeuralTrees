@@ -64,7 +64,8 @@ def visualise_routers_behaviours(model, data_loader,
         # compute stuff: 
         y_list, p_list =[], []
         for x, y in data_loader:
-            x, y = Variable(x, volatile=True), Variable(y)
+            # apparently not necessary in pytorch>=0.4
+            # x, y = Variable(x, volatile=True), Variable(y)
             if cuda_on:
                 x, y = x.cuda(), y.cuda()
             p, nodes_list = model.compute_routing_probabilities_uptonode(x, node)
@@ -106,7 +107,8 @@ def visualise_routers_behaviours(model, data_loader,
         # Histogram of reaching probabilities for respective peripheral nodes:
         for i, node_idx in enumerate(nodes_list):
             ax1 = fig.add_subplot(num_rows, num_cols, num_cols*(2*level+1) +i+1)
-            ax1.hist(p_full[:, i], normed=False, bins=25, range=(0, 1.0))
+            # ax1.hist(p_full[:, i], normed=False, bins=25, range=(0, 1.0))
+            ax1.hist(p_full[:, i], density=False, bins=25)
             if i==0:
                 ax1.set_ylabel("histogram of \n reaching prob. dist.", fontsize=axis_font)
 
@@ -289,7 +291,8 @@ def visualise_class_distributions_uptonode(current_node, model, data_loader,
     # Histogram of reaching probabilities for respective peripheral nodes:
     for i, node_idx in enumerate(nodes_list):
         ax1 = fig.add_subplot(num_rows, num_cols,num_cols+i+1)
-        ax1.hist(p_full[:, i], normed=False, bins=25, range=(0, 1.0))
+        # ax1.hist(p_full[:, i], normed=False, bins=25, range=(0, 1.0))
+        ax1.hist(p_full[:, i], density=False, bins=25)
         if i==0:
             ax1.set_ylabel("histogram of \n reaching prob. dist.", fontsize=axis_font)
 

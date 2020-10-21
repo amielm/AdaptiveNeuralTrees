@@ -746,7 +746,7 @@ class RouterGAPwithDoubleConv(nn.Module):
             if max(input_width, input_height)%2 ==0:
                 kernel_size += 1
  
-        padding = (kernel_size-1)/2 
+        padding = (kernel_size-1)//2
         self.conv1 = nn.Conv2d(input_nc, ngf, kernel_size=kernel_size, padding=padding)
         self.conv2 = nn.Conv2d(ngf, ngf, kernel_size=kernel_size, padding=padding)
         self.relu = nn.ReLU(inplace=True)
@@ -791,7 +791,7 @@ class Router_MLP_h1(nn.Module):
         self.stochastic=stochastic
 
         width = input_nc*input_width*input_height
-        self.fc1 = nn.Linear(width, width/reduction_rate + 1)
+        self.fc1 = nn.Linear(width, width//reduction_rate + 1)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
@@ -832,8 +832,8 @@ class RouterGAP_TwoFClayers(nn.Module):
         self.stochastic=stochastic
         self.dropout_prob = dropout_prob
     
-        self.fc1 = nn.Linear(input_nc, input_nc/reduction_rate + 1)
-        self.fc2 = nn.Linear(input_nc/reduction_rate + 1, 1)
+        self.fc1 = nn.Linear(input_nc, input_nc//reduction_rate + 1)
+        self.fc2 = nn.Linear(input_nc//reduction_rate + 1, 1)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
@@ -884,8 +884,8 @@ class RouterGAPwithConv_TwoFClayers(nn.Module):
             kernel_size = max(input_width, input_height)
 
         self.conv1 = nn.Conv2d(input_nc, ngf, kernel_size=kernel_size)
-        self.fc1 = nn.Linear(ngf, ngf/reduction_rate + 1)
-        self.fc2 = nn.Linear(ngf/reduction_rate + 1, 1)
+        self.fc1 = nn.Linear(ngf, ngf//reduction_rate + 1)
+        self.fc2 = nn.Linear(ngf//reduction_rate + 1, 1)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
@@ -954,8 +954,8 @@ class MLP_LeNetMNIST(nn.Module):
         super(MLP_LeNetMNIST, self).__init__()
         self.dropout_prob = dropout_prob
         ngf = input_nc*input_width*input_height
-        self.fc1 = nn.Linear(ngf, int(round(ngf/1.6)))
-        self.fc2 = nn.Linear(int(round(ngf/1.6)), 10)
+        self.fc1 = nn.Linear(ngf, int(round(ngf//1.6)))
+        self.fc2 = nn.Linear(int(round(ngf//1.6)), 10)
        
     def forward(self, x):
         x = x.view(x.size(0), -1)
@@ -973,8 +973,8 @@ class Solver_GAP_TwoFClayers(nn.Module):
         self.dropout_prob = dropout_prob
         self.reduction_rate = reduction_rate
 
-        self.fc1 = nn.Linear(input_nc, input_nc/reduction_rate + 1)
-        self.fc2 = nn.Linear(input_nc/reduction_rate + 1, 10)
+        self.fc1 = nn.Linear(input_nc, input_nc//reduction_rate + 1)
+        self.fc2 = nn.Linear(input_nc//reduction_rate + 1, 10)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
@@ -984,7 +984,7 @@ class Solver_GAP_TwoFClayers(nn.Module):
         x = F.relu(self.fc1(x))
         x = F.dropout(x, training=self.training, p=self.dropout_prob)
         x = self.fc2(x).squeeze()
-        return F.log_softmax(x)
+        return F.log_softmax(x, dim=1)
 
 
 class MLP_AlexNet(nn.Module):
