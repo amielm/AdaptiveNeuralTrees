@@ -18,21 +18,7 @@ supported by [Kai Arulkumaran](http://kaixhin.com).
 - CPU or NVIDIA GPU + CUDA 8.0 
 
 # Installation
-
-- Clone this repo:
-```bash
-git clone https://github.com/rtanno21609/AdaptiveNeuralTrees.git
-cd AdaptiveNeuralTrees
-```
-- (Optional) create a new Conda environment and activate it:
-```bash
-conda create -n ANT python=2.7
-source activate ANT
-```
-- Run the following to install required packages.
-``` 
-bash ./install.sh
-```
+I haven't updated the installation instructions for python3 yet.
 
 ## Usage
 
